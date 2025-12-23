@@ -1,0 +1,10 @@
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+Flask-SocketIO==5.3.6
+python-dotenv==1.0.1
+requests==2.32.3
+qrcode[pil]==7.4.2
+Pillow==10.4.0
+psycopg2-binary==2.9.9
+gunicorn==22.0.0
+eventlet==0.36.1
