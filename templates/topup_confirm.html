@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Konfirmasi Top-up{% endblock %}
+
+{% block content %}
+
+
+<div class="grid md:grid-cols-2 gap-6 items-start">
+
+  <!-- Detail transaksi -->
+  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
+    <div>
+      <p class="text-xs text-zinc-400 mb-1">Paket yang dipilih</p>
+      <p class="text-lg font-semibold">{{ tx.package_name }}</p>
+      <p class="text-sm text-zinc-300 mt-1">
+        Kredit: <span class="font-semibold text-emerald-300">{{ tx.credits }}</span> pesan WhatsApp
+      </p>
+      {% if tx.amount %}
+        <p class="text-sm text-zinc-300">
+          Perkiraan pembayaran:
+          <span class="font-semibold">
+            Rp {{ "{:,.0f}".format(tx.amount) }}
+          </span>
+        </p>
+      {% endif %}
+    </div>
+
+    <div class="text-xs text-zinc-400 space-y-1">
+      <p>Status transaksi:</p>
+      {% if tx.status == "success" %}
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/50 text-[11px]">
+          ● Berhasil - kredit sudah masuk
+        </span>
+      {% elif tx.status == "waiting_admin" %}
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-yellow-500/10 text-yellow-300 border border-yellow-500/50 text-[11px]">
+          ● Menunggu ACC admin
+        </span>
+      {% else %}
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700 text-[11px]">
+          ● Menunggu konfirmasi Anda
+        </span>
+      {% endif %}
+    </div>
+
+    <div class="text-[11px] text-zinc-500">
+      Setelah Anda melakukan pembayaran melalui QRIS di sebelah kanan, isi form konfirmasi dan upload bukti transfer.
+      Admin akan mengecek dan meng-ACC top-up Anda.
+    </div>
+
+    {% if tx.sender_name or tx.note or tx.proof_image %}
+      <div class="bg-zinc-950 rounded-xl border border-zinc-800 p-3 text-[11px] text-zinc-400 space-y-1">
+        <p class="mb-1 text-zinc-300">Data konfirmasi terakhir:</p>
+        {% if tx.sender_name %}
+          <p>Nama pengirim: <span class="text-zinc-200">{{ tx.sender_name }}</span></p>
+        {% endif %}
+        {% if tx.note %}
+          <p>Catatan: <span class="text-zinc-200">{{ tx.note }}</span></p>
+        {% endif %}
+        {% if tx.proof_image %}
+          <p class="mt-1">
+            Bukti transfer:
+            <a href="{{ url_for('static', filename=tx.proof_image) }}"
+               target="_blank"
+               class="text-blue-400 hover:text-blue-300 underline">
+              Lihat gambar
+            </a>
+          </p>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- QRIS + form konfirmasi -->
+  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
+    <div class="text-center">
+      <p class="text-xs text-zinc-400 mb-2">Scan QRIS untuk membayar</p>
+      <div class="inline-block bg-white rounded-xl p-3">
+        <img src="{{ url_for('static', filename=tx.qris_image or 'img/qris_default.png') }}"
+             alt="QRIS Pembayaran"
+             class="w-80 object-contain mx-auto" />
+      </div>
+      <p class="text-[11px] text-zinc-500 mt-2">
+        Gunakan aplikasi pembayaran (m-banking / e-wallet) untuk scan QRIS ini.
+      </p>
+    </div>
+
+    {% if tx.status != "success" %}
+      <form method="POST"
+            enctype="multipart/form-data"
+            class="space-y-3">
+        <div>
+          <label class="block mb-1 text-xs font-medium text-zinc-200">
+            Nama pemilik rekening / pengirim
+          </label>
+          <input name="sender_name"
+                 class="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2"
+                 placeholder="Contoh: Budi Santoso"
+                 value="{{ tx.sender_name or '' }}" />
+        </div>
+
+        <div>
+          <label class="block mb-1 text-xs font-medium text-zinc-200">
+            Bukti transfer (gambar)
+          </label>
+          <input type="file"
+                 name="proof_image"
+                 accept="image/*"
+                 class="w-full text-xs text-zinc-300">
+          <p class="text-[11px] text-zinc-500 mt-1">
+            Format yang disarankan: JPG / PNG / WEBP. Ukuran secukupnya.
+          </p>
+        </div>
+
+        <div>
+          <label class="block mb-1 text-xs font-medium text-zinc-200">
+            Catatan tambahan (opsional)
+          </label>
+          <textarea name="note"
+                    class="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2"
+                    rows="2"
+                    placeholder="Contoh: Sudah bayar via BCA, jam 14:32">{{ tx.note or '' }}</textarea>
+        </div>
+
+        <button
+          class="w-full bg-emerald-600 hover:bg-emerald-500 rounded-lg py-2.5 text-sm font-semibold">
+          Saya sudah melakukan pembayaran ✅
+        </button>
+
+        <p class="text-[11px] text-zinc-500">
+          Setelah Anda menekan tombol ini, sistem akan mengirim notifikasi ke admin untuk memeriksa dan meng-ACC top-up Anda.
+        </p>
+      </form>
+    {% else %}
+      <div class="text-xs text-emerald-300">
+        ✅ Pembayaran sudah dikonfirmasi admin. Kredit Anda sudah bertambah.
+        Silakan cek saldo di halaman Pengaturan.
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+
+{% endblock %}

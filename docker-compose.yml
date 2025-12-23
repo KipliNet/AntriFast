@@ -1,0 +1,10 @@
+services:
+  antrifast:
+    build: .
+    restart: unless-stopped 
+    networks:
+      - cloudflared  
+
+networks:
+   cloudflared:
+     external: true

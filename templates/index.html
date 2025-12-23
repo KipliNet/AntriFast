@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <title>AntriFast - Sistem antrian digital untuk UMKM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- SEO dasar -->
+    <meta name="description" content="AntriFast adalah sistem antrian digital untuk UMKM (barbershop, klinik, bengkel, resto) dengan notifikasi WhatsApp otomatis tanpa install aplikasi." />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="keywords" content="antrifast, sistem antrian digital, aplikasi antrian online, antrian WhatsApp, antrian UMKM, barbershop, klinik, bengkel, restoran, PWA antrian, QR antrian" />
+    <meta name="author" content="AntriFast" />
+    <link rel="canonical" href="{{ url_for('index', _external=True) }}" />
+
+    <!-- Favicon -->
+    <link rel="icon" href="{{ url_for('static', filename='img/icon.webp', _external=True) }}" type="image/webp" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="id_ID" />
+    <meta property="og:site_name" content="AntriFast" />
+    <meta property="og:title" content="AntriFast - Sistem antrian digital untuk UMKM" />
+    <meta property="og:description" content="Sistem antrian digital untuk UMKM dengan nomor antrian via QR code dan notifikasi WhatsApp otomatis tanpa install aplikasi." />
+    <meta property="og:url" content="{{ url_for('index', _external=True) }}" />
+    <meta property="og:image" content="{{ url_for('static', filename='img/lanscape.webp', _external=True) }}" />
+    <meta property="og:image:alt" content="Tampilan sistem antrian digital AntriFast dengan dashboard dan mode layar TV" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AntriFast - Antri lebih cepat dan teratur" />
+    <meta name="twitter:description" content="Pelanggan ambil nomor antrian via QR, pemilik usaha cukup klik 'Selesai & Panggil Berikutnya', notifikasi WhatsApp otomatis terkirim." />
+    <meta name="twitter:image" content="{{ url_for('static', filename='img/lanscape.webp', _external=True) }}" />
+
+    <!-- Performance -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" />
+    <link rel="preconnect" href="https://unpkg.com" />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <!-- PWA manifest -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#020617" />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "AntriFast",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "description": "Sistem antrian digital untuk UMKM dengan notifikasi WhatsApp otomatis."
+    }
+    </script>
+
+    <style>
+        body {
+            background: radial-gradient(circle at top, #020617, #020617 40%, #000 100%);
+            color: #f9fafb;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+        .glass {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(14px);
+        }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+
+    <!-- NAVBAR -->
+    <header class="border-b border-zinc-800/70 bg-black/40 sticky top-0 z-20">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <!-- Inline SVG Logo (Q + chat) -->
+                <div class="w-10 h-10 rounded-lg bg-zinc-950/40 border border-zinc-800 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 140 140" role="img" aria-label="Logo AntriFast">
+                        <defs>
+                            <linearGradient id="g-nav" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0" stop-color="#3B82F6"/>
+                                <stop offset="1" stop-color="#34D399"/>
+                            </linearGradient>
+                        </defs>
+
+                        <circle cx="70" cy="70" r="48"
+                                fill="none"
+                                stroke="url(#g-nav)"
+                                stroke-width="16"
+                                stroke-linecap="round"
+                                stroke-dasharray="250 55"
+                                transform="rotate(-28 70 70)"/>
+                        <path d="M98 98 L124 124"
+                              stroke="url(#g-nav)"
+                              stroke-width="16"
+                              stroke-linecap="round"/>
+                        <circle cx="54" cy="54" r="7" fill="#34D399"/>
+                    </svg>
+                </div>
+
+                <div>
+                    <p class="font-semibold text-sm md:text-base">AntriFast</p>
+                    <p class="text-[11px] text-zinc-400 hidden md:block">Sistem antrian digital untuk UMKM 🇮🇩</p>
+                </div>
+            </div>
+
+            <nav class="hidden md:flex items-center gap-6 text-sm text-zinc-300">
+                <a href="#fitur" class="hover:text-white">Fitur</a>
+                <a href="#cara-kerja" class="hover:text-white">Cara Kerja</a>
+                <a href="#demo" class="hover:text-white">Demo</a>
+                <a href="#paket" class="hover:text-white">Paket</a>
+                <a href="#faq" class="hover:text-white">FAQ</a>
+            </nav>
+
+            <div class="flex items-center gap-3">
+                <a href="{{ url_for('login') }}"
+                   class="hidden md:inline-block text-xs md:text-sm text-zinc-300 hover:text-white">
+                    Login
+                </a>
+                <a href="{{ url_for('register') }}"
+                   class="text-xs md:text-sm px-4 py-2 rounded-md font-semibold bg-blue-600 hover:bg-blue-500">
+                    Daftarkan UMKM Anda 🔥
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO -->
+    <main class="flex-1">
+        <section class="max-w-6xl mx-auto px-4 pt-10 md:pt-16 pb-12 md:pb-16">
+            <div class="grid md:grid-cols-2 gap-10 items-center">
+                <!-- Hero Text -->
+                <div id="hero-text" class="space-y-5">
+                    <div class="inline-flex items-center gap-2 text-xs md:text-sm px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/40 text-emerald-200">
+                        💬 Sistem ini gratis, cukup beli paket notif WhatsApp
+                    </div>
+
+                    <h1 class="text-3xl md:text-5xl font-extrabold leading-tight">
+                        AntriFast - sistem antrian digital
+                        <span class="text-emerald-400">tanpa ribet</span> untuk UMKM.
+                    </h1>
+
+                    <p class="text-sm md:text-base text-zinc-300">
+                        Pelanggan scan QR untuk ambil nomor. Kamu tinggal klik
+                        <span class="font-semibold">“Selesai &amp; Panggil Berikutnya”</span>.
+                        Sistem otomatis kirim WhatsApp saat giliran pelanggan sudah dekat.
+                    </p>
+
+                    <div class="flex flex-wrap gap-2 text-[11px] text-zinc-300">
+                        <span class="px-2 py-1 rounded-full bg-zinc-900 border border-zinc-800">✅ Tanpa install app</span>
+                        <span class="px-2 py-1 rounded-full bg-zinc-900 border border-zinc-800">✅ QR antrian siap</span>
+                        <span class="px-2 py-1 rounded-full bg-zinc-900 border border-zinc-800">✅ Notif WhatsApp otomatis</span>
+                    </div>
+
+                    <ul class="text-sm md:text-base text-zinc-300 space-y-1">
+                        <li>✅ Cocok untuk barbershop, klinik, bengkel, warung makan, dll.</li>
+                        <li>✅ Tidak perlu install aplikasi - cukup PWA / browser.</li>
+                        <li>✅ Bayar hanya paket notifikasi WhatsApp, sistemnya bisa dipakai gratis.</li>
+                    </ul>
+
+                    <div class="flex flex-wrap items-center gap-3 pt-2">
+                        <a href="{{ url_for('register') }}"
+                           class="px-5 py-3 rounded-md bg-blue-600 hover:bg-blue-500 text-sm font-semibold">
+                            Mulai Gratis Sekarang 🚀
+                        </a>
+                        <a href="#demo" class="text-xs md:text-sm text-zinc-300 hover:text-white">
+                            Coba demo dulu 👀
+                        </a>
+                        <a href="#paket" class="text-xs md:text-sm text-zinc-300 hover:text-white">
+                            Lihat paket notif 💬
+                        </a>
+                    </div>
+
+                    <p class="text-[11px] md:text-xs text-zinc-500">
+                        Tidak ada biaya setup. Tidak ada kontrak. Cukup isi saldo notif WhatsApp sesuai kebutuhan.
+                    </p>
+                </div>
+
+                <!-- Hero Visual -->
+                <div id="hero-visual" class="glass rounded-2xl border border-zinc-800/80 p-4 md:p-6 shadow-xl">
+                    <p class="text-xs text-zinc-400 mb-2">Preview tampilan (dashboard & layar TV)</p>
+                    <div class="grid grid-rows-2 gap-3 h-full">
+                        <!-- Dashboard -->
+                        <div class="bg-zinc-950/80 rounded-xl border border-zinc-800 p-3 flex flex-col">
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="text-[11px] text-zinc-400">Dashboard Pemilik</p>
+                                <span class="text-[11px] text-emerald-300">Live</span>
+                            </div>
+                            <div class="flex items-end justify-between gap-3">
+                                <div>
+                                    <p class="text-xs text-zinc-400">Sedang dipanggil</p>
+                                    <p class="text-3xl md:text-4xl font-bold text-emerald-400">27</p>
+                                    <p class="text-[11px] text-zinc-400 mt-1">Atas nama: Budi</p>
+                                </div>
+                                <button class="bg-blue-600 hover:bg-blue-500 text-[11px] px-3 py-1.5 rounded-md">
+                                    ✅ Selesai &amp; Panggil Berikutnya
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2 mt-3 text-[11px] text-zinc-300">
+                                <div class="bg-zinc-900 rounded-md p-2">
+                                    <p>📅 Hari ini</p>
+                                    <p class="text-lg font-semibold">54</p>
+                                </div>
+                                <div class="bg-zinc-900 rounded-md p-2">
+                                    <p>💬 Kredit WA</p>
+                                    <p class="text-lg font-semibold">84</p>
+                                </div>
+                                <div class="bg-zinc-900 rounded-md p-2">
+                                    <p>⏰ Jam ramai</p>
+                                    <p class="text-lg font-semibold">10.00–12.00</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TV / Kiosk -->
+                        <div class="bg-zinc-950/80 rounded-xl border border-zinc-800 p-3 flex flex-col">
+                            <p class="text-[11px] text-zinc-400 mb-1">Mode Layar TV / Kiosk</p>
+                            <div class="flex items-center justify-between mb-2">
+                                <div>
+                                    <p class="text-[11px] text-zinc-400">Sedang dipanggil</p>
+                                    <p class="text-3xl font-bold text-emerald-300">27</p>
+                                </div>
+                                <div class="text-right text-[11px] text-zinc-400">
+                                    <p>Senin, 08 Des 2025</p>
+                                    <p>14:32:10</p>
+                                </div>
+                            </div>
+                            <div class="flex-1 grid grid-cols-2 gap-2">
+                                <div class="bg-zinc-900 rounded-md p-2 text-[11px]">
+                                    <p class="text-zinc-400 mb-1">Berikutnya</p>
+                                    <p>#28 - Siti</p>
+                                    <p>#29 - Andi</p>
+                                    <p>#30 - Dewa</p>
+                                </div>
+                                <div class="bg-zinc-900 rounded-md p-2 flex items-center justify-center text-[11px] text-zinc-500">
+                                    🎥 Area promo / info
+                                </div>
+                            </div>
+
+                            <a href="#demo" class="inline-block mt-3 text-xs text-zinc-300 hover:text-white underline">
+                                Lihat demo alur pelanggan →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Kenapa AntriFast -->
+        <section id="fitur" class="max-w-6xl mx-auto px-4 pb-12 md:pb-16">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6">Kenapa UMKM pakai AntriFast?</h2>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="glass rounded-xl border border-zinc-800 p-5">
+                    <h3 class="text-lg font-semibold mb-2">⏳ Antrian tanpa ribet</h3>
+                    <p class="text-sm text-zinc-300">
+                        Pelanggan cukup scan QR, ambil nomor di HP, dan pantau antrian lewat link.
+                        Tidak perlu nanya “sudah nomor berapa?” setiap saat.
+                    </p>
+                </div>
+                <div class="glass rounded-xl border border-zinc-800 p-5">
+                    <h3 class="text-lg font-semibold mb-2">💬 Hanya bayar paket WhatsApp</h3>
+                    <p class="text-sm text-zinc-300">
+                        Sistem antrian dan dashboard bisa dipakai gratis. Isi kredit hanya untuk notifikasi WhatsApp.
+                    </p>
+                </div>
+                <div class="glass rounded-xl border border-zinc-800 p-5">
+                    <h3 class="text-lg font-semibold mb-2">📊 Data jam ramai</h3>
+                    <p class="text-sm text-zinc-300">
+                        Lihat jam ramai, total antrian, dan performa pelayanan untuk operasional yang lebih rapi.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Cara Kerja -->
+        <section id="cara-kerja" class="max-w-6xl mx-auto px-4 pb-12 md:pb-16">
+            <div class="grid md:grid-cols-2 gap-8 items-start">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-bold mb-4">Cara kerja untuk pemilik usaha</h2>
+                    <ol class="space-y-3 text-sm md:text-base text-zinc-200">
+                        <li>1️⃣ <strong>Daftar & buat UMKM</strong> - buat akun, isi nama usaha, otomatis dapat URL & QR antrian.</li>
+                        <li>2️⃣ <strong>Tempel QR di tempat usaha</strong> - pelanggan scan QR untuk ambil nomor dari HP.</li>
+                        <li>3️⃣ <strong>Gunakan dashboard</strong> - klik “Selesai &amp; Panggil Berikutnya”, sistem update antrian & layar display.</li>
+                        <li>4️⃣ <strong>Notifikasi WhatsApp otomatis</strong> - ketika giliran sudah dekat, sistem kirim WA ke pelanggan (memotong kredit notif).</li>
+                        <li>5️⃣ <strong>Isi ulang kredit notif</strong> - saat kredit hampir habis, top up paket notif sesuai kebutuhan.</li>
+                    </ol>
+                </div>
+
+                <div class="glass rounded-2xl border border-zinc-800 p-5">
+                    <h3 class="text-lg font-semibold mb-3">👀 Pengalaman dari sisi pelanggan</h3>
+                    <ul class="space-y-2 text-sm text-zinc-300">
+                        <li>• Scan QR → ambil nomor dari HP.</li>
+                        <li>• Dapat WhatsApp berisi nomor antrian + link untuk cek status antrian.</li>
+                        <li>• Saat tinggal beberapa nomor lagi, dapat WA pengingat otomatis.</li>
+                        <li>• Tidak perlu menunggu di depan kasir terus, lebih fleksibel.</li>
+                    </ul>
+                    <p class="text-xs text-zinc-500 mt-4">
+                        1 kredit = 1 pesan WhatsApp.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- DEMO -->
+        <section id="demo" class="max-w-6xl mx-auto px-4 pb-12 md:pb-16">
+            <div class="glass rounded-2xl border border-zinc-800 p-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-bold">Coba demo tanpa daftar</h2>
+                        <p class="text-sm text-zinc-300 mt-1">Alur pelanggan, dashboard, dan layar TV.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <a href="/tuan-cukur" class="px-4 py-2 rounded-md bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold">
+                            Demo pelanggan
+                        </a>
+                        <a href="/dashboard" class="px-4 py-2 rounded-md bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold">
+                            Demo dashboard
+                        </a>
+                        <a href="/display/tuan-cukur" class="px-4 py-2 rounded-md bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold">
+                            Demo layar TV
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-4 grid md:grid-cols-3 gap-3 text-[12px] text-zinc-300">
+                    <div class="bg-zinc-950/60 border border-zinc-800 rounded-xl p-4">
+                        <p class="text-zinc-400 mb-1 text-[11px]">1) Ambil nomor</p>
+                        <p>Scan QR → isi nama & WA → dapat nomor + link status.</p>
+                    </div>
+                    <div class="bg-zinc-950/60 border border-zinc-800 rounded-xl p-4">
+                        <p class="text-zinc-400 mb-1 text-[11px]">2) Panggil berikutnya</p>
+                        <p>Owner klik selesai → sistem update nomor & display.</p>
+                    </div>
+                    <div class="bg-zinc-950/60 border border-zinc-800 rounded-xl p-4">
+                        <p class="text-zinc-400 mb-1 text-[11px]">3) Notif WhatsApp</p>
+                        <p>WA pengingat terkirim saat nomor pelanggan sudah dekat.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+
+        <!-- Section: Paket Notifikasi WhatsApp -->
+        <section id="paket" class="max-w-6xl mx-auto px-4 pb-12 md:pb-16">
+            <div class="flex items-end justify-between mb-6 gap-4">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-bold mb-2">Paket Notifikasi WhatsApp 💬</h2>
+                    
+                    <p class="text-sm md:text-base text-zinc-300 max-w-2xl">
+                    AntriFast dapat digunakan gratis tanpa biaya langganan. Anda hanya membayar
+                    <span class="font-semibold text-zinc-100">notifikasi WhatsApp</span> yang benar-benar dikirim ke pelanggan.
+                    Harga transparan, tanpa kontrak, dan bisa disesuaikan dengan kebutuhan usaha.
+                    </p>
+
+                    <p class="mt-2 text-[11px] text-zinc-500">
+                    1 kredit = 1 pesan WhatsApp. Harga mulai dari <strong>Rp 350 per notifikasi</strong>.
+                    </p>
+                    <p class="text-sm text-zinc-300">
+                    Sistem antrian, dashboard, dan layar display dapat digunakan sepuasnya.
+                    Kredit hanya terpakai saat sistem mengirim pesan WhatsApp ke pelanggan
+                    (konfirmasi nomor atau pengingat giliran).
+                    </p>
+
+                    <p class="text-sm md:text-base text-zinc-300">
+                        Gunakan sistem antrian sepuasnya, cukup isi kredit untuk kirim pengingat WhatsApp ke pelanggan.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Paket kecil -->
+                <div class="glass rounded-2xl border border-zinc-800 p-5 flex flex-col">
+                    <p class="text-xs text-zinc-400 mb-1">Paket Kecil</p>
+                    <h3 class="text-xl font-bold">20 Kredit</h3>
+                    <p class="text-[11px] text-zinc-400 mb-3">± 20 pesan WhatsApp • 1 kredit = 1 pesan</p>
+
+                    <div class="bg-zinc-950/50 border border-zinc-800 rounded-xl p-3 mb-4">
+                        <p class="text-[11px] text-zinc-400">Harga</p>
+                        <p class="text-3xl font-extrabold">Rp 10.000</p>
+                        <p class="text-[11px] text-zinc-500 mt-1">Estimasi: ± 10–20 pelanggan</p>
+                    </div>
+
+                    <p class="text-sm text-zinc-300 mb-4">
+                        Cocok untuk usaha dengan antrian tidak terlalu ramai (barbershop kecil, bengkel, warung).
+                    </p>
+                    <ul class="text-xs text-zinc-300 space-y-1 mb-4">
+                        <li>• 20 notifikasi WhatsApp</li>
+                        <li>• Masa aktif fleksibel</li>
+                        <li>• Bisa di-top up kapan saja</li>
+                    </ul>
+                    <div class="mt-auto">
+                        <a href="{{ url_for('register') }}"
+                           class="block w-full text-center bg-zinc-800 hover:bg-zinc-700 rounded-md py-2 text-xs font-semibold">
+                            Mulai pakai
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Paket rame (highlight) -->
+                <div class="glass rounded-2xl border border-emerald-500/70 p-5 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-blue-500/10 pointer-events-none"></div>
+                    <div class="relative flex flex-col h-full">
+                        <p class="text-xs text-emerald-300 mb-1">Paling populer</p>
+                        <h3 class="text-xl font-bold">50 Kredit</h3>
+                        <p class="text-[11px] text-zinc-300 mb-3">± 50 pesan WhatsApp • 1 kredit = 1 pesan</p>
+
+                        <div class="bg-zinc-950/50 border border-emerald-500/40 rounded-xl p-3 mb-4">
+                            <p class="text-[11px] text-zinc-300">Harga</p>
+                            <p class="text-3xl font-extrabold">Rp 20.000</p>
+                            <p class="text-[11px] text-zinc-300 mt-1">Estimasi: ± 25–50 pelanggan</p>
+                        </div>
+
+                        <p class="text-sm text-zinc-200 mb-4">
+                            Untuk barbershop, klinik, dan resto dengan arus pengunjung cukup ramai.
+                        </p>
+                        <ul class="text-xs text-zinc-200 space-y-1 mb-4">
+                            <li>• 50 notifikasi WhatsApp</li>
+                            <li>• Ideal dipakai harian / mingguan</li>
+                            <li>• Bisa di-top up kapan saja</li>
+                        </ul>
+                        <div class="mt-auto">
+                            <a href="{{ url_for('register') }}"
+                               class="block w-full text-center bg-emerald-600 hover:bg-emerald-500 rounded-md py-2 text-xs font-semibold">
+                                Mulai pakai
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paket sultan -->
+                <div class="glass rounded-2xl border border-zinc-800 p-5 flex flex-col">
+                    <p class="text-xs text-zinc-400 mb-1">Paket Sultan</p>
+                    <h3 class="text-xl font-bold">100 Kredit</h3>
+                    <p class="text-[11px] text-zinc-400 mb-3">± 100 pesan WhatsApp • 1 kredit = 1 pesan</p>
+
+                    <div class="bg-zinc-950/50 border border-zinc-800 rounded-xl p-3 mb-4">
+                        <p class="text-[11px] text-zinc-400">Harga</p>
+                        <p class="text-3xl font-extrabold">Rp 35.000</p>
+                        <p class="text-[11px] text-zinc-500 mt-1">Estimasi: ± 50–100 pelanggan</p>
+                    </div>
+
+                    <p class="text-sm text-zinc-300 mb-4">
+                        Untuk klinik besar, rumah makan ramai, atau usaha dengan volume tinggi.
+                    </p>
+                    <ul class="text-xs text-zinc-300 space-y-1 mb-4">
+                        <li>• 100 notifikasi WhatsApp</li>
+                        <li>• Lebih hemat untuk volume besar</li>
+                        <li>• Support prioritas</li>
+                    </ul>
+                    <div class="mt-auto">
+                        <a href="{{ url_for('register') }}"
+                           class="block w-full text-center bg-zinc-800 hover:bg-zinc-700 rounded-md py-2 text-xs font-semibold">
+                            Mulai pakai
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <p class="mt-4 text-[11px] text-zinc-500">
+                Top up tersedia di menu <strong>Pengaturan &gt; Top-up Kredit</strong>.
+            </p>
+        </section>
+
+        <!-- Section: Cocok untuk usaha apa? -->
+        <section class="max-w-6xl mx-auto px-4 pb-12 md:pb-16">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6">Cocok untuk jenis usaha apa?</h2>
+            <div class="grid md:grid-cols-4 gap-4 text-sm text-zinc-200">
+                <div class="glass rounded-xl border border-zinc-800 p-4">
+                    💈 <span class="font-semibold">Barbershop / salon</span>
+                    <p class="text-xs text-zinc-400 mt-1">Pelanggan tidak perlu menunggu di kursi depan terus.</p>
+                </div>
+                <div class="glass rounded-xl border border-zinc-800 p-4">
+                    🛠️ <span class="font-semibold">Bengkel motor / mobil</span>
+                    <p class="text-xs text-zinc-400 mt-1">Urutkan kendaraan, kirim WA saat hampir giliran servis.</p>
+                </div>
+                <div class="glass rounded-xl border border-zinc-800 p-4">
+                    🍜 <span class="font-semibold">Warung makan / resto</span>
+                    <p class="text-xs text-zinc-400 mt-1">Kelola waiting list saat jam makan siang/malam.</p>
+                </div>
+                <div class="glass rounded-xl border border-zinc-800 p-4">
+                    🏥 <span class="font-semibold">Klinik / praktek dokter</span>
+                    <p class="text-xs text-zinc-400 mt-1">Panggil pasien dengan antrian rapi dan jelas.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: FAQ -->
+        <section id="faq" class="max-w-4xl mx-auto px-4 pb-16">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 text-center">Pertanyaan yang sering ditanyakan</h2>
+
+            <div class="space-y-3" x-data="{ open: 'q1' }">
+                <!-- Q1 -->
+                <div class="glass border border-zinc-800 rounded-xl">
+                    <button class="w-full text-left px-4 py-3 flex justify-between items-center text-sm"
+                            @click="open === 'q1' ? open = null : open = 'q1'">
+                        <span>Apakah pakai AntriFast berbayar?</span>
+                        <span x-text="open === 'q1' ? '-' : '+'"></span>
+                    </button>
+                    <div x-show="open === 'q1'" x-cloak class="px-4 pb-4 text-xs text-zinc-300">
+                        Sistem antrian, dashboard, dan mode display bisa dipakai gratis. Kredit hanya untuk notifikasi WhatsApp.
+                    </div>
+                </div>
+
+                <!-- Q2 -->
+                <div class="glass border border-zinc-800 rounded-xl">
+                    <button class="w-full text-left px-4 py-3 flex justify-between items-center text-sm"
+                            @click="open === 'q2' ? open = null : open = 'q2'">
+                        <span>Bagaimana cara pelanggan ambil nomor antrian?</span>
+                        <span x-text="open === 'q2' ? '-' : '+'"></span>
+                    </button>
+                    <div x-show="open === 'q2'" x-cloak class="px-4 pb-4 text-xs text-zinc-300">
+                        Setiap UMKM punya URL & QR code sendiri. Pelanggan scan QR lalu ambil nomor dari browser HP - tanpa perlu install aplikasi.
+                    </div>
+                </div>
+
+                <!-- Q3 -->
+                <div class="glass border border-zinc-800 rounded-xl">
+                    <button class="w-full text-left px-4 py-3 flex justify-between items-center text-sm"
+                            @click="open === 'q3' ? open = null : open = 'q3'">
+                        <span>Bagaimana hitung penggunaan kredit WhatsApp?</span>
+                        <span x-text="open === 'q3' ? '-' : '+'"></span>
+                    </button>
+                    <div x-show="open === 'q3'" x-cloak class="px-4 pb-4 text-xs text-zinc-300">
+                        Setiap 1 pesan WhatsApp yang dikirim (konfirmasi tiket baru maupun pengingat otomatis) akan mengurangi 1 kredit dari saldo UMKM.
+                    </div>
+                </div>
+
+                <!-- Q4 -->
+                <div class="glass border border-zinc-800 rounded-xl">
+                    <button class="w-full text-left px-4 py-3 flex justify-between items-center text-sm"
+                            @click="open === 'q4' ? open = null : open = 'q4'">
+                        <span>Apakah ada kontrak atau minimum transaksi?</span>
+                        <span x-text="open === 'q4' ? '-' : '+'"></span>
+                    </button>
+                    <div x-show="open === 'q4'" x-cloak class="px-4 pb-4 text-xs text-zinc-300">
+                        Tidak ada kontrak. Isi ulang kredit dilakukan kapan saja sesuai kebutuhan.
+                    </div>
+                </div>
+
+                <!-- Q5 -->
+                <div class="glass border border-zinc-800 rounded-xl">
+                    <button class="w-full text-left px-4 py-3 flex justify-between items-center text-sm"
+                            @click="open === 'q5' ? open = null : open = 'q5'">
+                        <span>Apakah notifikasi WhatsApp aman?</span>
+                        <span x-text="open === 'q5' ? '-' : '+'"></span>
+                    </button>
+                    <div x-show="open === 'q5'" x-cloak class="px-4 pb-4 text-xs text-zinc-300">
+                        Pelanggan memasukkan nomor WhatsApp untuk menerima notifikasi terkait antrian. Notifikasi bisa dinonaktifkan kapan saja.
+                    </div>
+                </div>
+
+                <!-- Q6 -->
+                <div class="glass border border-zinc-800 rounded-xl">
+                    <button class="w-full text-left px-4 py-3 flex justify-between items-center text-sm"
+                            @click="open === 'q6' ? open = null : open = 'q6'">
+                        <span>Kalau pelanggan tidak punya WhatsApp?</span>
+                        <span x-text="open === 'q6' ? '-' : '+'"></span>
+                    </button>
+                    <div x-show="open === 'q6'" x-cloak class="px-4 pb-4 text-xs text-zinc-300">
+                        Pelanggan tetap bisa ambil nomor dan pantau antrian lewat link. WhatsApp hanya untuk pengingat otomatis.
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-8">
+                <a href="{{ url_for('register') }}"
+                   class="px-5 py-3 rounded-md bg-blue-600 hover:bg-blue-500 text-sm font-semibold">
+                    Coba AntriFast untuk UMKM Anda 🚀
+                </a>
+            </div>
+        </section> 
+        <section id="legal"
+         class="max-w-6xl mx-auto px-4 pb-16"
+         x-data="{ open: null }"
+         x-on:legal-open.window="open = $event.detail.key; $nextTick(() => $el.scrollIntoView({ behavior: 'smooth', block: 'start' }))"
+         x-cloak>
+        <!-- PRIVACY -->
+        <div id="privacy" x-show="open === 'privacy'" class="glass rounded-2xl border border-zinc-800 px-5 py-6">
+            <h2 class="text-xl md:text-2xl font-bold mb-2">Kebijakan Privasi</h2>
+            <p class="text-sm text-zinc-300">
+            Kebijakan ini menjelaskan data yang diproses saat Anda menggunakan AntriFast.
+            </p>
+
+            <div class="mt-5 space-y-4 text-sm text-zinc-200">
+            <div>
+                <h3 class="font-semibold mb-1">1) Data yang diproses</h3>
+                <ul class="list-disc pl-5 text-zinc-300 space-y-1">
+                <li>Data akun pemilik usaha: email, nama usaha, dan informasi pengaturan layanan.</li>
+                <li>Data antrian pelanggan: nama (opsional), nomor WhatsApp (opsional), dan waktu pengambilan nomor.</li>
+                <li>Log operasional: status antrian dan riwayat pengiriman notifikasi.</li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="font-semibold mb-1">2) Tujuan penggunaan</h3>
+                <ul class="list-disc pl-5 text-zinc-300 space-y-1">
+                <li>Menyediakan nomor antrian dan pembaruan status antrian.</li>
+                <li>Mengirim notifikasi WhatsApp terkait antrian (jika nomor WhatsApp diisi).</li>
+                <li>Menampilkan ringkasan operasional seperti total antrian dan jam ramai.</li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="font-semibold mb-1">3) Notifikasi WhatsApp</h3>
+                <p class="text-zinc-300">
+                Notifikasi WhatsApp dikirim berdasarkan aktivitas antrian (mis. konfirmasi nomor, pengingat saat giliran dekat).
+                Penggunaan kredit dihitung per pesan.
+                </p>
+            </div>
+
+            <div>
+                <h3 class="font-semibold mb-1">4) Penyimpanan & keamanan</h3>
+                <p class="text-zinc-300">
+                Data disimpan untuk kebutuhan operasional layanan. Akses dibatasi sesuai peran dan kebutuhan sistem.
+                </p>
+            </div>
+
+            <div>
+                <h3 class="font-semibold mb-1">5) Hak pengguna</h3>
+                <ul class="list-disc pl-5 text-zinc-300 space-y-1">
+                <li>Pemilik usaha dapat memperbarui dan menghapus data usaha sesuai fitur yang tersedia.</li>
+                <li>Pelanggan dapat meminta penghapusan data kontak yang pernah diisikan melalui pemilik usaha.</li>
+                </ul>
+            </div>
+            </div>
+        </div>
+
+        <!-- TERMS -->
+        <div id="terms" x-show="open === 'terms'" class="glass rounded-2xl border border-zinc-800 px-5 py-6">
+            <h2 class="text-xl md:text-2xl font-bold mb-2">Syarat &amp; Ketentuan</h2>
+            <p class="text-sm text-zinc-300">
+            Dengan menggunakan AntriFast, Anda menyetujui ketentuan berikut.
+            </p>
+
+            <div class="mt-5 space-y-4 text-sm text-zinc-200">
+            <div>
+                <h3 class="font-semibold mb-1">1) Layanan</h3>
+                <p class="text-zinc-300">
+                AntriFast menyediakan sistem antrian digital, dashboard pengelolaan, dan fitur notifikasi WhatsApp berbasis kredit.
+                </p>
+            </div>
+
+            <div>
+                <h3 class="font-semibold mb-1">2) Akun & akses</h3>
+                <p class="text-zinc-300">
+                Pemilik usaha bertanggung jawab menjaga kerahasiaan kredensial akun dan aktivitas yang terjadi pada akun tersebut.
+                </p>
+            </div>
+
+            <div>
+                <h3 class="font-semibold mb-1">3) Kredit notifikasi</h3>
+                <ul class="list-disc pl-5 text-zinc-300 space-y-1">
+                <li>1 kredit = 1 pesan WhatsApp yang dikirim sistem.</li>
+                <li>Kredit berkurang saat pesan dikirim.</li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="font-semibold mb-1">4) Kewajiban penggunaan</h3>
+                <ul class="list-disc pl-5 text-zinc-300 space-y-1">
+                <li>Tidak menggunakan layanan untuk spam atau aktivitas melanggar hukum.</li>
+                <li>Menggunakan data pelanggan sesuai persetujuan dan kebutuhan antrian.</li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="font-semibold mb-1">5) Pembaruan layanan</h3>
+                <p class="text-zinc-300">
+                Fitur dan tampilan dapat berubah untuk peningkatan layanan.
+                </p>
+            </div>
+            </div>
+        </div>
+
+        <!-- CONTACT -->
+        <div id="contact" x-show="open === 'contact'" class="glass rounded-2xl border border-zinc-800 px-5 py-6">
+            <h2 class="text-xl md:text-2xl font-bold mb-2">Kontak</h2>
+            <p class="text-sm text-zinc-300">
+            Hubungi kami untuk dukungan, kerja sama, atau pertanyaan.
+            </p>
+
+            <div class="mt-5 grid md:grid-cols-2 gap-4 text-sm">
+            <div class="bg-zinc-950/60 border border-zinc-800 rounded-xl p-4">
+                <p class="text-[11px] text-zinc-400 mb-1">Email</p>
+                <p class="text-zinc-200 font-semibold">support@indofastdigital.com</p>
+                <p class="text-[11px] text-zinc-500 mt-1">Balasan 1×24 jam (hari kerja).</p>
+            </div>
+
+            <div class="bg-zinc-950/60 border border-zinc-800 rounded-xl p-4">
+                <p class="text-[11px] text-zinc-400 mb-1">WhatsApp</p>
+                <p class="text-zinc-200 font-semibold">+62 856-2603-077</p>
+                <p class="text-[11px] text-zinc-500 mt-1">AntriFast.</p>
+            </div>
+            </div>
+ 
+        </div>
+        </section>
+
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-zinc-800/70 bg-black/80">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-2">
+            <p class="text-[11px] text-zinc-500">
+                © {{ now().year }} AntriFast - Sistem antrian digital untuk UMKM 🇮🇩.
+            </p>
+            
+            
+            <div class="flex gap-4 text-[11px] text-zinc-500">
+                <a href="#privacy" data-legal="privacy">Privasi</a>
+                <a href="#terms" data-legal="terms">S&amp;K</a>
+                <a href="#contact" data-legal="contact">Kontak</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- GSAP Animations & PWA Service Worker -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            if (window.gsap) {
+                gsap.from("#hero-text", { opacity: 0, y: 30, duration: 0.8 });
+                gsap.from("#hero-visual", { opacity: 0, y: 30, duration: 0.8, delay: 0.2 });
+            }
+
+            if ("serviceWorker" in navigator) {
+                navigator.serviceWorker.register("{{ url_for('static', filename='service-worker.js') }}")
+                    .catch(function () {});
+            }
+        });
+        
+        
+        
+        document.addEventListener("DOMContentLoaded", function () {
+            function openLegal(key) {
+            if (!key) return;
+            // set hash supaya bisa di-refresh/share
+            if (location.hash !== "#" + key) location.hash = key;
+
+            // kirim event ke Alpine (tanpa akses __x)
+            window.dispatchEvent(new CustomEvent("legal-open", { detail: { key: key } }));
+            }
+
+            // klik link footer / link manapun yang pakai data-legal
+            document.querySelectorAll("[data-legal]").forEach(function (a) {
+            a.addEventListener("click", function (e) {
+                e.preventDefault();
+                openLegal(a.getAttribute("data-legal"));
+            });
+            });
+
+            // kalau user buka URL dengan hash
+            function openFromHash() {
+            var h = (location.hash || "").replace("#", "");
+            if (h === "privacy" || h === "terms" || h === "contact") openLegal(h);
+            }
+
+            window.addEventListener("hashchange", openFromHash);
+            openFromHash();
+        });
+    </script>
+</body>
+</html>

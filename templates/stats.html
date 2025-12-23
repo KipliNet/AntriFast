@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Statistik{% endblock %}
+
+{% block content %}
+
+<h1 class="text-3xl font-bold mb-6">📈 Statistik - {{ umkm.name }}</h1>
+
+<div class="flex items-center justify-between mb-6">
+    <p class="text-zinc-400">
+        Grafik jumlah antrian per jam untuk tanggal
+        <span class="font-semibold">{{ target_day.strftime("%d %b %Y") }}</span>
+    </p>
+
+    <form method="GET" class="flex items-center gap-2 text-sm">
+        <input type="date" name="day"
+               value="{{ target_day.strftime('%Y-%m-%d') }}"
+               class="bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs">
+        <button class="bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded-md">
+            Terapkan
+        </button>
+    </form>
+</div>
+
+<!-- Grafik -->
+<div class="bg-zinc-900 p-6 rounded-xl border border-zinc-800">
+
+    {% if stats %}
+        <div class="space-y-4">
+            {% for hour, count in stats %}
+                <div>
+                    <p class="text-sm mb-1">
+                        {{ hour.strftime("%H:00") }} - {{ count }} antrian
+                    </p>
+
+                    <div class="h-3 bg-zinc-700 rounded">
+                        <div class="h-3 bg-blue-500 rounded"
+                             style="width: {{ 20 + count * 10 }}px;"></div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-zinc-500">Belum ada data statistik untuk tanggal ini.</p>
+    {% endif %}
+
+</div>
+
+{% endblock %}

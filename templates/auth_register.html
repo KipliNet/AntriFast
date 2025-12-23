@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Daftar{% endblock %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-6">Daftar Akun Pemilik UMKM</h1>
+
+<form method="POST" class="max-w-lg space-y-4">
+
+    <!-- Nama user -->
+    <div>
+        <label class="block mb-1 text-sm">Nama Anda</label>
+        <input type="text" name="name"
+               class="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2"
+               required />
+    </div>
+
+    <!-- Email -->
+    <div>
+        <label class="block mb-1 text-sm">Email</label>
+        <input type="email" name="email"
+               class="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2"
+               required />
+    </div>
+    <div>
+      <label class="block mb-1 text-xs font-medium text-zinc-200">
+         WhatsApp
+      </label>
+      <input name="owner_whatsapp"
+               class="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2"
+               placeholder="628xxxxxxxxxx" required/> 
+   </div>
+
+
+    <!-- Password -->
+    <div>
+        <label class="block mb-1 text-sm">Password</label>
+        <input type="password" name="password"
+               class="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2"
+               required />
+    </div>
+
+    <hr class="border-zinc-700">
+
+    <!-- Data UMKM -->
+    <div>
+        <label class="block mb-1 text-sm">Nama UMKM</label>
+        <input type="text" name="umkm_name"
+               class="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2"
+               required />
+    </div>
+
+    <div>
+        <label class="block mb-1 text-sm">Slug URL UMKM</label>
+        <input type="text" name="slug"
+               class="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2"
+               placeholder="contoh: barbershop-andi"
+               required />
+        <p class="text-xs text-zinc-500 mt-1">
+            URL publik UMKM: /slug-umkm
+        </p>
+    </div>
+
+    <button class="bg-green-600 hover:bg-green-500 px-5 py-2 rounded-md font-semibold w-full">
+        Daftar 🚀
+    </button>
+</form>
+
+<p class="mt-4 text-zinc-400 text-sm">
+    Sudah punya akun? <a href="/login" class="text-blue-400">Login</a>
+</p>
+
+{% endblock %}

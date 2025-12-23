@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-6">Masuk ke AntriLoka</h1>
+
+<form method="POST" class="max-w-md space-y-4">
+
+    <div>
+        <label class="block mb-1 text-sm">Email</label>
+        <input type="email" name="email"
+               class="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2"
+               required />
+    </div>
+
+    <div>
+        <label class="block mb-1 text-sm">Password</label>
+        <input type="password" name="password"
+               class="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2"
+               required />
+    </div>
+
+    <button class="bg-blue-600 hover:bg-blue-500 px-5 py-2 rounded-md font-semibold w-full">
+        Login
+    </button>
+</form>
+
+<p class="mt-4 text-zinc-400 text-sm">
+    Belum punya akun? <a href="/register" class="text-blue-400">Daftar</a>
+    
+</p>
+<p class="text-[11px] md:text-xs text-zinc-500">
+                        Untuk Demo gunakan akun: ajiz@gmail.com / password: 12345678
+                    </p>
+{% endblock %}

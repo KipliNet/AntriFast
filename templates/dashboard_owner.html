@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% block title %}Dashboard UMKM{% endblock %}
+
+{% block content %}
+
+<h1 class="text-3xl font-bold mb-6">📊 Dashboard - {{ umkm.name }}</h1>
+
+<!-- Ringkasan Cepat -->
+<div class="grid md:grid-cols-2 gap-6 mb-10">
+
+    <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-xl">
+        <p class="text-sm text-zinc-400">Total Antrian Hari Ini</p>
+        <p class="text-4xl font-bold mt-2">{{ count_today }}</p>
+    </div>
+
+    <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-xl">
+        <p class="text-sm text-zinc-400">Sisa Kredit WhatsApp</p>
+        <p class="text-4xl font-bold mt-2">{{ umkm.credit_balance }}</p>
+        <p class="text-xs text-zinc-500 mt-1">
+            Atur kredit di menu <a href="{{ url_for('dashboard_settings') }}" class="text-blue-400">Pengaturan</a>.
+        </p>
+    </div>
+
+</div>
+
+<!-- Nomor Sedang Dipanggil -->
+<div class="bg-zinc-900 border border-zinc-800 p-6 rounded-xl mb-10">
+    <h2 class="text-xl font-semibold mb-4">📢 Nomor Sedang Dipanggil</h2>
+
+    {% if current_called %}
+        <div class="flex items-center gap-6">
+            <div>
+                <p class="text-6xl font-bold text-green-400 leading-none">
+                    {{ current_called.queue_number }}
+                </p>
+                <p class="text-sm text-zinc-400 mt-3">
+                    {{ current_called.customer_name or 'Tanpa nama' }}
+                </p>
+            </div>
+
+            <div class="flex flex-col gap-3 mt-2">
+                <!-- Selesai & Panggil Berikutnya -->
+                <form method="POST" action="{{ url_for('queue_next') }}" class="call-next-form">
+                    <button
+                        class="bg-blue-600 hover:bg-blue-500 px-5 py-2 rounded-md font-semibold text-sm w-full">
+                        ✅ Selesai & Panggil Berikutnya
+                    </button>
+                </form>
+
+                <!-- Lewati (Tidak Hadir) & Panggil Berikutnya -->
+                <form method="POST" action="{{ url_for('queue_skip') }}" class="skip-next-form">
+                    <button
+                        class="bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 px-5 py-2 rounded-md text-sm w-full">
+                        ⏱️ Tidak Hadir & Panggil Berikutnya
+                    </button>
+                </form>
+            </div>
+        </div>
+    {% else %}
+        <p class="text-zinc-500 mb-4">Belum ada nomor yang dipanggil.</p>
+
+        {% if waiting|length > 0 %}
+            <form method="POST" action="{{ url_for('queue_next') }}" class="call-next-form">
+                <button
+                    class="bg-blue-600 hover:bg-blue-500 px-5 py-2 rounded-md font-semibold text-sm">
+                    Panggil Nomor Pertama 🔔
+                </button>
+            </form>
+        {% else %}
+            <p class="text-xs text-zinc-500">
+                Belum ada antrian hari ini.
+            </p>
+        {% endif %}
+    {% endif %}
+</div>
+
+<!-- Tabs: Antrian Aktif & Histori (Alpine.js) -->
+<div x-data="{ tab: 'waiting' }">
+
+    <div class="flex gap-3 mb-4">
+        <button
+            class="px-4 py-2 rounded-md text-sm font-semibold"
+            :class="tab === 'waiting' ? 'bg-blue-600' : 'bg-zinc-800'"
+            @click="tab = 'waiting'">
+            ⏳ Antrian Menunggu ({{ waiting|length }})
+        </button>
+        <button
+            class="px-4 py-2 rounded-md text-sm font-semibold"
+            :class="tab === 'history' ? 'bg-blue-600' : 'bg-zinc-800'"
+            @click="tab = 'history'">
+            🗂 Histori Hari Ini ({{ history|length }})
+        </button>
+    </div>
+
+    <!-- Antrian Menunggu -->
+    <div x-show="tab === 'waiting'" x-cloak>
+        <h2 class="text-2xl font-semibold mb-4">⏳ Antrian Menunggu</h2>
+
+        <div class="space-y-4">
+            {% for q in waiting %}
+            <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-xl flex justify-between items-center">
+
+                <div>
+                    <p class="text-xl font-semibold">
+                        Nomor: <span class="text-blue-400">{{ q.queue_number }}</span>
+                    </p>
+                    <p class="text-sm text-zinc-400">
+                        {{ q.customer_name or 'Tanpa Nama' }}
+                        {% if q.customer_phone %}
+                            - 📱 {{ q.customer_phone }}
+                        {% endif %}
+                    </p>
+                </div>
+
+                <div class="flex gap-2">
+
+                    {% if q.customer_phone %}
+                    <form method="POST" action="{{ url_for('send_wa', queue_id=q.id) }}">
+                        <button
+                            class="bg-green-600 hover:bg-green-500 px-3 py-2 rounded-md text-sm">
+                            Kirim WA 💬
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('queue_cancel', queue_id=q.id) }}">
+                        <button
+                            class="bg-red-600 hover:bg-red-500 px-3 py-2 rounded-md text-sm">
+                            Batal
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% if waiting|length == 0 %}
+            <p class="text-zinc-500">Tidak ada antrian menunggu.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Histori Hari Ini -->
+    <div x-show="tab === 'history'" x-cloak>
+        <h2 class="text-2xl font-semibold mb-4">🗂 Histori Antrian Hari Ini</h2>
+
+        <div class="space-y-3">
+            {% for q in history %}
+            <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-xl flex justify-between items-center">
+                <div>
+                    <p class="font-semibold">
+                        #{{ q.queue_number }} - {{ q.customer_name or 'Tanpa Nama' }}
+                    </p>
+                    <p class="text-xs text-zinc-500">
+                        Status:
+                        {% if q.status == 'done' %}
+                            ✅ Selesai
+                        {% elif q.status == 'canceled' %}
+                            ❌ Dibatalkan
+                        {% elif q.status == 'no_show' %}
+                            ⏱️ Tidak hadir
+                        {% else %}
+                            {{ q.status }}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% if history|length == 0 %}
+            <p class="text-zinc-500">Belum ada histori hari ini.</p>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<!-- Audio untuk panggilan -->
+<audio id="sound-call">
+    <source src="{{ url_for('static', filename='sounds/call.mp3') }}" type="audio/mpeg">
+</audio>
+
+<script>
+    // Simple: play sound saat form panggil berikutnya dikirim
+    const callSound = document.getElementById("sound-call");
+
+    document.querySelectorAll(".call-next-form").forEach(form => {
+        form.addEventListener("submit", () => {
+            try { callSound.currentTime = 0; callSound.play(); } catch (e) {}
+        });
+    });
+
+    document.querySelectorAll(".skip-next-form").forEach(form => {
+        form.addEventListener("submit", () => {
+            try { callSound.currentTime = 0; callSound.play(); } catch (e) {}
+        });
+    });
+</script>
+
+{% endblock %}

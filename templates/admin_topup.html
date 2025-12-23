@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Admin Top-up{% endblock %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-6">📋 Admin - Top-up Kredit</h1>
+
+<p class="text-xs text-red-400 mb-4">
+  *Halaman ini belum dilindungi login admin. Pastikan URL ini hanya diketahui oleh Anda / tim internal.
+</p>
+
+<div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 overflow-x-auto">
+  <table class="min-w-full text-xs md:text-sm">
+    <thead class="text-zinc-400 border-b border-zinc-800">
+      <tr>
+        <th class="py-2 pr-4 text-left">ID</th>
+        <th class="py-2 pr-4 text-left">UMKM</th>
+        <th class="py-2 pr-4 text-left">Paket</th>
+        <th class="py-2 pr-4 text-left">Kredit</th>
+        <th class="py-2 pr-4 text-left">Rp</th>
+        <th class="py-2 pr-4 text-left">Status</th>
+        <th class="py-2 pr-4 text-left">Pengirim</th>
+        <th class="py-2 pr-4 text-left">Bukti</th>
+        <th class="py-2 pr-4 text-left">Aksi</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-zinc-800">
+      {% for tx in txs %}
+      <tr>
+        <td class="py-2 pr-4 align-top">#{{ tx.id }}</td>
+        <td class="py-2 pr-4 align-top">
+          <div class="font-semibold text-zinc-100">{{ tx.umkm.name }}</div>
+          <div class="text-[11px] text-zinc-500">
+            User: {{ tx.user.email }}
+          </div>
+        </td>
+        <td class="py-2 pr-4 align-top">
+          <div>{{ tx.package_name }}</div>
+        </td>
+        <td class="py-2 pr-4 align-top">
+          {{ tx.credits }}
+        </td>
+        <td class="py-2 pr-4 align-top">
+          {% if tx.amount %}
+            Rp {{ "{:,.0f}".format(tx.amount) }}
+          {% else %}
+            -
+          {% endif %}
+        </td>
+        <td class="py-2 pr-4 align-top">
+          {% if tx.status == "success" %}
+            <span class="text-emerald-300 text-[11px]">success</span>
+          {% elif tx.status == "waiting_admin" %}
+            <span class="text-yellow-300 text-[11px]">waiting_admin</span>
+          {% else %}
+            <span class="text-zinc-400 text-[11px]">{{ tx.status }}</span>
+          {% endif %}
+        </td>
+        <td class="py-2 pr-4 align-top text-[11px] text-zinc-300">
+          {% if tx.sender_name %}
+            {{ tx.sender_name }}
+          {% endif %}
+          {% if tx.note %}
+            <div class="text-zinc-500 mt-1">{{ tx.note }}</div>
+          {% endif %}
+        </td>
+        <td class="py-2 pr-4 align-top text-[11px]">
+          {% if tx.proof_image %}
+            <a href="{{ url_for('static', filename=tx.proof_image) }}"
+               target="_blank"
+               class="text-blue-400 hover:text-blue-300 underline">
+              Lihat bukti
+            </a>
+          {% else %}
+            -
+          {% endif %}
+        </td>
+        <td class="py-2 pr-4 align-top">
+          {% if tx.status != "success" %}
+          <form method="POST" action="{{ url_for('admin_topup_approve', tx_id=tx.id) }}">
+            <button
+              class="px-3 py-1 rounded-md bg-emerald-600 hover:bg-emerald-500 text-[11px] font-semibold">
+              ACC & Tambah kredit
+            </button>
+          </form>
+          {% else %}
+            <span class="text-[11px] text-zinc-500">✓ Sudah ACC</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="9" class="py-4 text-center text-zinc-400 text-xs">
+          Belum ada transaksi top-up.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

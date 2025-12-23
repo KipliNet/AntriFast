@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>AntriFast • {% block title %}{% endblock %}</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- GSAP CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}" />
+
+    <!-- iOS PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+
+    <!-- Basic dark theme style -->
+    <style>
+        body {
+            background-color: #0f0f0f;
+            color: #f0f0f0;
+        }
+    </style>
+
+    {% block head %}{% endblock %}
+</head>
+
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-zinc-900 border-b border-zinc-800 py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <!-- Inline SVG Logo (Q + chat) -->
+                <div class="w-10 h-10 rounded-lg bg-zinc-950/40 border border-zinc-800 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 140 140" role="img" aria-label="Logo AntriFast">
+                        <defs>
+                            <linearGradient id="g-nav" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0" stop-color="#3B82F6"></stop>
+                                <stop offset="1" stop-color="#34D399"></stop>
+                            </linearGradient>
+                        </defs>
+
+                        <circle cx="70" cy="70" r="48" fill="none" stroke="url(#g-nav)" stroke-width="16" stroke-linecap="round" stroke-dasharray="250 55" transform="rotate(-28 70 70)"></circle>
+                        <path d="M98 98 L124 124" stroke="url(#g-nav)" stroke-width="16" stroke-linecap="round"></path>
+                        <circle cx="54" cy="54" r="7" fill="#34D399"></circle>
+                    </svg>
+                </div>
+
+                <div>
+                    <p class="font-semibold text-sm md:text-base"><a href="/" class="text-xl font-semibold tracking-wide">AntriFast</a></p> 
+                    <p class="text-[11px] text-zinc-400 hidden md:block">Sistem antrian digital untuk UMKM 🇮🇩</p>
+                </div>
+            </div>  
+
+            <div class="space-x-4 text-sm">
+                {% if session.get('user_id') %}
+                    <a href="{{ url_for('dashboard') }}" class="hover:text-blue-400">Dashboard</a>
+                    <a href="{{ url_for('dashboard_stats') }}" class="hover:text-blue-400">Statistik</a>
+                    <a href="{{ url_for('dashboard_settings') }}" class="hover:text-blue-400">Pengaturan</a>
+                    <a href="{{ url_for('logout') }}" class="hover:text-red-400">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="hover:text-blue-400">Login</a>
+                    <a href="{{ url_for('register') }}" class="hover:text-green-400">Daftar</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div class="container mx-auto px-4 mt-4">
+        {% with msgs = get_flashed_messages(with_categories=true) %}
+            {% if msgs %}
+                <div class="space-y-2">
+                    {% for category, msg in msgs %}
+                        <div class="p-3 rounded-md text-sm
+                            {% if category == 'success' %} bg-green-800/40 border border-green-600 {% endif %}
+                            {% if category == 'danger' %} bg-red-800/40 border border-red-600 {% endif %}
+                            {% if category == 'info' %} bg-blue-800/40 border border-blue-600 {% endif %}
+                        ">
+                            {{ msg }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 container mx-auto px-4 py-6">
+        <div id="pageContent" class="opacity-0 translate-y-4">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-zinc-900 text-center py-4 border-t border-zinc-800">
+        <p class="text-sm text-zinc-500">
+            ©   AntriFast - Sistem antrian digital untuk UMKM 🇮🇩
+        </p>
+    </footer>
+
+    <!-- GSAP Animation -->
+    <script>
+        gsap.to("#pageContent", {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: "power3.out"
+        });
+    </script>
+
+    <!-- Register Service Worker + update listener -->
+    <script>
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker
+                .register("{{ url_for('static', filename='service-worker.js') }}")
+                .then(reg => {
+                    reg.onupdatefound = () => {
+                        const newWorker = reg.installing;
+                        newWorker.onstatechange = () => {
+                            if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+                                console.log("Update PWA tersedia.");
+                            }
+                        };
+                    };
+                })
+                .catch(err => console.error("SW registration failed:", err));
+        }
+    </script>
+
+</body>
+</html>
